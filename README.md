@@ -10,7 +10,7 @@
 ![Java](https://img.shields.io/badge/-Java-ED8B00?logo=openjdk&logoColor=white)
 ![TDD](https://img.shields.io/badge/TDD-RED%E2%86%92GREEN-brightgreen)
 
-**20 rules · 12 references · 24 before/after examples**
+**20 rules · 12 references · 10 before/after pairs (35 Java files)**
 
 ---
 
@@ -56,7 +56,7 @@ Clean code principles work best **applied inline while you're writing or reviewi
 
 - A fast 20-rule checklist (loaded in <500 words on every invocation).
 - 12 topic references (`naming.md`, `functions.md`, `solid.md`, …) loaded on demand for depth.
-- 24 before/after Java examples grounded in Spring Boot 3, plain Java, and pure domain logic.
+- 10 before/after Java pairs (35 files) grounded in Spring Boot 3, plain Java, and pure domain logic.
 - A TDD-discipline harness: every skill change starts with a failing pressure scenario and ends with a verified GREEN run.
 
 ---
@@ -231,7 +231,7 @@ From any Claude Code session, say:
 
 ## Examples gallery
 
-24 before/after `.java` files demonstrating the skill on three kinds of Java code. Each pair shows the before, the after, and which rule(s) the diff demonstrates.
+10 before/after pairs (35 `.java` files total) demonstrating the skill on three kinds of Java code. Each pair shows the before, the after, and which rule(s) the diff demonstrates.
 
 ### Spring Boot
 
