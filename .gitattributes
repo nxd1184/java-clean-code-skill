@@ -22,3 +22,9 @@ docs/**           linguist-documentation=true
 
 # Tests are tests, not source.
 tests/**          linguist-documentation=true
+
+# Linguist's default heuristics auto-vendor `examples/` directories. Override:
+# these Java files ARE part of the product (paired before/after teaching code).
+examples/**       linguist-vendored=false
+examples/**       linguist-generated=false
+examples/**       linguist-detectable=true
