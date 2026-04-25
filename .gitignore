@@ -1,0 +1,52 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+*.swp
+*.swo
+.idea/
+.vscode/
+*.iml
+
+# Build artifacts (Java — defensive; this repo isn't Java but examples are)
+*.class
+*.jar
+target/
+build/
+
+# JS / package managers (defensive)
+node_modules/
+
+# Local zips for Claude upload
+dist/
+
+# ---------------------------------------------------------------------------
+# Claude Code local state — DO NOT COMMIT
+#
+# We ship .claude/skills/java-clean-code/ on purpose. Everything else under
+# .claude/ is per-user runtime state and can leak credentials, MCP tokens,
+# session transcripts, or machine-specific paths.
+# ---------------------------------------------------------------------------
+.claude/settings.local.json
+.claude/settings.json
+.claude/.credentials.json
+.claude/projects/
+.claude/plugins/
+.claude/todos/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/mcp.json
+
+# ---------------------------------------------------------------------------
+# Secrets — defensive blanket
+# ---------------------------------------------------------------------------
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.pfx
+*credentials*.json
+*secret*.json

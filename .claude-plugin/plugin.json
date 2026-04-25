@@ -1,0 +1,11 @@
+{
+  "name": "java-clean-code",
+  "description": "Clean code principles for Java projects (any version; Spring Boot friendly) — naming, functions, SOLID, TDD, concurrency, clean architecture.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Steven Nguyen"
+  },
+  "license": "MIT",
+  "keywords": ["java", "spring-boot", "clean-code", "refactoring", "solid", "tdd"],
+  "skills": ["./.claude/skills/java-clean-code"]
+}
