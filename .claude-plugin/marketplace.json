@@ -1,0 +1,25 @@
+{
+  "name": "java-clean-code-skill",
+  "id": "java-clean-code-skill",
+  "owner": {
+    "name": "Steven Nguyen"
+  },
+  "metadata": {
+    "description": "Clean code principles for Java projects — a top-20 checklist plus 12 topic references, installable as a Claude Code skill.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "java-clean-code",
+      "source": "./",
+      "description": "Clean code principles for Java projects (any version; Spring Boot friendly). Covers naming, functions, SOLID, TDD, concurrency, clean architecture, and craftsmanship.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Steven Nguyen"
+      },
+      "keywords": ["java", "spring-boot", "clean-code", "refactoring", "solid", "tdd"],
+      "category": "development",
+      "strict": false
+    }
+  ]
+}

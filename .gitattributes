@@ -1,0 +1,24 @@
+# GitHub Linguist overrides — make the language bar reflect the actual product.
+#
+# This repo's primary content is the Markdown skill (SKILL.md + 12 references)
+# plus illustrative Java examples. The shell / PowerShell scripts are install
+# tooling, not the product. Linguist's default behavior — counting scripts as
+# code and ignoring Markdown as "documentation" — misrepresents the repo.
+
+# Treat install/uninstall/package scripts as tooling (excluded from stats).
+install.sh        linguist-vendored
+install.ps1       linguist-vendored
+uninstall.sh      linguist-vendored
+uninstall.ps1     linguist-vendored
+package.sh        linguist-vendored
+package.ps1       linguist-vendored
+
+# Surface Markdown in the language bar (it IS the product here).
+*.md              linguist-detectable=true
+*.md              linguist-documentation=false
+
+# Plan / design history — keep classified as documentation (don't inflate stats).
+docs/**           linguist-documentation=true
+
+# Tests are tests, not source.
+tests/**          linguist-documentation=true
