@@ -5,14 +5,14 @@
     "name": "Steven Nguyen"
   },
   "metadata": {
-    "description": "Clean code principles for Java projects — a top-20 checklist plus 12 topic references, installable as a Claude Code skill.",
+    "description": "Clean code principles for any Java project (Spring Boot, Quarkus, plain Java) — a top-20 checklist plus 12 topic references, installable as a Claude Code skill.",
     "version": "0.1.0"
   },
   "plugins": [
     {
       "name": "java-clean-code",
       "source": "./",
-      "description": "Clean code principles for Java projects (any version; Spring Boot friendly). Covers naming, functions, SOLID, TDD, concurrency, clean architecture, and craftsmanship.",
+      "description": "Clean code principles for any Java project. Covers naming, functions, SOLID, TDD, concurrency, clean architecture, and craftsmanship. Examples in Spring Boot, plain Java, and pure domain logic.",
       "version": "0.1.0",
       "author": {
         "name": "Steven Nguyen"
