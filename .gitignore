@@ -21,6 +21,11 @@ node_modules/
 # Local zips for Claude upload
 dist/
 
+# Internal design docs / plans — kept locally, not published.
+# (We had a leak incident with /Users paths in earlier plan files;
+# blanket-ignore the whole docs/ tree to avoid recurrence.)
+docs/
+
 # ---------------------------------------------------------------------------
 # Claude Code local state — DO NOT COMMIT
 #
