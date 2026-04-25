@@ -25,6 +25,9 @@ tests/**          linguist-documentation=true
 
 # Linguist's default heuristics auto-vendor `examples/` directories. Override:
 # these Java files ARE part of the product (paired before/after teaching code).
+# Need both -vendored=false AND an explicit -language=Java tag — Linguist's
+# vendor + language-detection happen in different passes for paths like this.
 examples/**       linguist-vendored=false
 examples/**       linguist-generated=false
-examples/**       linguist-detectable=true
+examples/**/*.java linguist-language=Java
+examples/**/*.java linguist-detectable=true
