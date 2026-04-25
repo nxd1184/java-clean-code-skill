@@ -1,6 +1,6 @@
 ---
 name: java-clean-code
-description: Use when writing, reviewing, or refactoring Java code — including Spring Boot services, REST controllers, JPA/JDBC, background jobs. Triggers: "clean this up", "is this idiomatic?", code review on Java files, code-smell or technical-debt concerns, SOLID/DRY/SRP questions, TDD setup for Java.
+description: Use when writing, reviewing, or refactoring Java code — services, controllers, libraries, batch jobs, CLIs (Spring Boot, Quarkus, plain Java). Triggers: "clean this up", "is this idiomatic?", code review on Java files, code-smell or technical-debt concerns, SOLID/DRY/SRP questions, TDD setup for Java.
 ---
 
 # Java Clean Code
