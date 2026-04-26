@@ -23,11 +23,10 @@ docs/**           linguist-documentation=true
 # Tests are tests, not source.
 tests/**          linguist-documentation=true
 
-# Linguist's default heuristics auto-vendor `examples/` directories. Override:
-# these Java files ARE part of the product (paired before/after teaching code).
-# Need both -vendored=false AND an explicit -language=Java tag — Linguist's
-# vendor + language-detection happen in different passes for paths like this.
-examples/**       linguist-vendored=false
-examples/**       linguist-generated=false
-examples/**/*.java linguist-language=Java
-examples/**/*.java linguist-detectable=true
+# Linguist treats top-level `examples/` as DOCUMENTATION by default —
+# see github-linguist/linguist `documentation.yml`, which has the regex
+# `^[Ee]xamples/` on its documentation list. Without this override, our
+# Java teaching code wouldn't count toward the language bar.
+# These pairs ARE the product (paired before/after teaching code), not
+# docs about the product.
+examples/**       linguist-documentation=false
