@@ -288,23 +288,14 @@ java-clean-code-skill/
 
 ---
 
-## Contributing & TDD discipline
+## Contributing
 
-This skill follows the `superpowers:writing-skills` Iron Law: **no edit to skill content without a failing test first.**
+Contributions welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for full guidelines, including the TDD Iron Law for skill changes, the word/line budgets, and the PR process.
 
-For any change to `SKILL.md` or `references/*.md`:
-
-1. Add a pressure scenario to `tests/scenarios.md` (RED baseline).
-2. Capture baseline behavior in `tests/red-baseline.md` — what does Claude do *without* the skill?
-3. Edit the skill.
-4. Verify GREEN compliance in `tests/green-verification.md` — Claude now follows the rule.
-
-Word/line budgets enforced:
-
-- `SKILL.md` ≤ 500 words (loaded every invocation)
-- `references/*.md` < 300 lines each
-
-See [`CLAUDE.md`](./CLAUDE.md) for full conventions.
+- Add a new before/after example pair (10 pairs today; more rules waiting)
+- Add a pressure scenario in `tests/scenarios.md`
+- Improve a reference file
+- File issues for skill behavior that doesn't match the rule
 
 ---
 
@@ -358,3 +349,7 @@ The 20 rules and topic references are distilled from *Clean Code: A Handbook of 
 ## License
 
 MIT — see [LICENSE](LICENSE).
+
+This skill is provided "as is" without warranty. The maintainer does not audit or guarantee that Claude's application of these rules will be correct in every situation. Review Claude's suggestions before applying them. The maintainer accepts no liability for issues arising from using this skill.
+
+If you find an issue with skill behavior, please [open an issue](https://github.com/nxd1184/java-clean-code-skill/issues) and we'll address it.
