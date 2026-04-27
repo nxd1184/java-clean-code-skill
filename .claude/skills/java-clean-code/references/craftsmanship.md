@@ -74,3 +74,46 @@ Craftsmanship applies to every rule in SKILL.md. The most common points of failu
 | "One more flag is fine" | 4 | [functions.md](functions.md) |
 | "We'll refactor later" | 2, 12 | [functions.md](functions.md), [solid.md](solid.md) |
 | "Comments explain it" | 1, 20 | [naming.md](naming.md), [comments.md](comments.md) |
+
+---
+
+## Effective Java additions
+
+### Item 67: Optimize judiciously
+
+> "Premature optimization is the root of all evil." — Donald Knuth
+
+The discipline:
+
+1. **Strive for clean code first.** Names, function shape, SRP. Clean code
+   is usually *fast enough*.
+2. **Measure before optimizing.** Profile the running system. Don't trust
+   your guess about hotspots — humans are bad at it.
+3. **Optimize the algorithm, not the constant factor.** Replacing O(n²)
+   with O(n log n) beats hand-tuning the inner loop by 5%.
+4. **Optimize at the API surface, judiciously.** Library choices that lock
+   you into a slow data structure are expensive to undo.
+
+### Anti-patterns
+
+- **Caching without measurement.** Every cache is a correctness risk
+  (staleness, eviction). Don't add one until you've measured the cost of
+  *not* having it.
+- **Premature parallelism.** Spawning threads or using parallel streams
+  before measuring single-threaded performance.
+- **String interning claims** ("we intern() to save memory"). Modern JVMs
+  handle string deduplication automatically; manual interning rarely wins.
+- **Comments like `// cached for performance — DO NOT REMOVE`** without
+  profiling data. The comment is the smell; either link evidence or
+  remove. *(This was the most common gap in our RED baseline — reviewers
+  trust unverified perf claims.)*
+
+### When optimization IS warranted
+
+- A benchmark or profiler shows a bottleneck.
+- A user-visible latency target is missed.
+- An API design choice locks the implementation in (e.g. `LinkedList` vs
+  `ArrayList` for a published API).
+
+Reinforces **the Boy-Scout Rule** above. Item 67 narrows it: leave the
+code cleaner, but *measure* before claiming it's faster.
