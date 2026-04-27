@@ -94,3 +94,57 @@ Banners signal that the class is too large and relies on visual anchors instead 
 
 - SKILL.md rule: 20
 - Related: [naming.md](naming.md) — names often make comments redundant; if you need a comment to explain a variable, rename it first.
+
+---
+
+## Effective Java additions
+
+### Item 56: Write doc comments for all exposed API elements
+
+Rule 20 says comments earn their keep — and that "WHY not WHAT" is the
+test. **Public API surface is a deliberate exception:** doc comments at
+the API are part of the contract, not just help-the-reader prose.
+
+A method's doc comment must say:
+
+- **What it does**, not *how* (callers don't see the body).
+- **Preconditions** (`@param` if a constraint exists).
+- **Postconditions** (`@return` if non-trivial).
+- **Side effects** (mention them — even one is worth a sentence).
+- **Failure modes** (`@throws` for each declared exception, including
+  unchecked when relevant).
+
+```java
+/**
+ * Charges the given payment method for the order's total.
+ *
+ * <p>Idempotent: charging the same {@code orderId} twice never charges
+ * the card twice.
+ *
+ * @param orderId   the order to charge; must be persisted and unfulfilled
+ * @param cardToken the tokenised payment method (PCI-DSS scope)
+ * @return a {@link ChargeReceipt} on success; never null
+ * @throws InsufficientFundsException if the card balance is below the order total
+ * @throws PaymentGatewayException    if the gateway is unavailable
+ * @implSpec the method holds a transaction open for the duration of the
+ *           gateway call; callers should not nest in another transaction
+ */
+public ChargeReceipt charge(OrderId orderId, String cardToken) { /* ... */ }
+```
+
+**Tags worth knowing:**
+- `@param`, `@return`, `@throws` — the basics.
+- `@implSpec` — what subclasses can rely on.
+- `@code` — inline code (escapes HTML).
+- `@literal` — like `@code` but no monospace; use for `<` and `>` in prose.
+- `@deprecated` — paired with `@Deprecated` annotation; explain the
+  alternative.
+
+### When NOT to write doc comments
+
+- **Private methods** — Rule 20 still applies; readers can read the body.
+- **Trivial getters/setters** — auto-generated noise; the IDE reveals types.
+- **`@Override` methods** with no behavior change — inherit the parent's doc.
+
+Reinforces **Rule 20** above. Compact rule: WHY > WHAT, but for *public*
+APIs, both must appear because the WHAT is the contract.
