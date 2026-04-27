@@ -252,3 +252,327 @@ counter.
 | (Implicit) review without citing rule numbers or a catalog. | 2, 4 | SKILL.md must encourage citing rule numbers and linking to `references/*.md`. |
 | (Implicit) no Law-of-Demeter vocabulary — trainwrecks not named. | 2 | `references/objects-and-data.md` must foreground the word "trainwreck" and give a Java Before/After. |
 | (Implicit) no test-first on a brand-new controller. | 1 | SKILL.md workflow for "Writing new Java" must start with the failing JUnit 5 test. |
+
+---
+
+## EJ-merge RED baselines (captured 2026-04-27)
+
+Each of the 10 EJ-merge scenarios was run against a fresh general-purpose
+subagent with NO skill loaded. Verbatim outputs below. The skill content
+written in subsequent tasks must address what these baselines reveal —
+specifically, the consistent absence of EJ item number+title citations and
+the partial coverage of fixes a calibrated skill would propose.
+
+### Scenario 5 — Constructor with five parameters
+
+**Subagent output (verbatim):**
+
+```
+**Code Review: Pizza Constructor**
+
+This class has a classic **boolean parameter problem**. When callers invoke this constructor, they get a wall of unnamed booleans:
+
+    new Pizza("large", true, false, true, false, true)
+
+It's impossible to tell what each `true`/`false` means without jumping to the signature. That's a readability and maintainability risk.
+
+**Suggestion: Use a builder pattern or an enum for toppings.**
+
+Option 1 — Builder (cleaner for future expansion):
+    Pizza pizza = new Pizza.Builder("large")
+        .withCheese(true)
+        .withPepperoni(false)
+        .withMushrooms(true)
+        .build();
+
+Option 2 — Enum set (if toppings are fixed):
+    Pizza pizza = new Pizza("large",
+        Set.of(Topping.CHEESE, Topping.MUSHROOMS));
+
+The builder approach scales better as toppings grow. It also makes it obvious *which* toppings are requested and eliminates positional confusion. If you're keeping the constructor, at least extract the booleans into a `Toppings` value object so the signature reads naturally.
+```
+
+**Observed gaps:**
+- Did the subagent mention Builder pattern? **yes** (suggested as Option 1).
+- Did it cite EJ Item 2 by number+title? **no**.
+- Did it suggest a `record`? **no** — proposed an `EnumSet`-style constructor instead.
+- Did it mention ≤3 args / no flag args explicitly? **partial** — used the phrase "boolean parameter problem" but no rule citation.
+
+### Scenario 6 — Raw type ArrayList
+
+**Subagent output (verbatim):**
+
+```
+# Code Review
+
+A few issues here:
+
+**Type safety**: This ArrayList is raw-typed, which defeats Java's generics. You're mixing strings and integers, forcing everything through `Object`. At runtime, if you later try to cast an element assuming it's a String, you'll get a ClassCastException. Use `ArrayList<String>` (or whatever the actual type should be) and let the compiler catch errors early.
+
+**Unnecessary toString()**: You're calling `.toString()` on every Object, but `println()` already does that. Just pass the object directly: `System.out.println(o);`
+
+**List vs ArrayList**: Unless you specifically need ArrayList's mutability or random access, declare it as `List<String> list = new ArrayList<>();`. This gives you flexibility to swap implementations later without changing call sites.
+
+**Practical fix**:
+    List<String> list = new ArrayList<>();
+    list.add("hello");
+    list.add("42");  // or parse if it should be an int
+    for (String item : list) {
+        System.out.println(item);
+    }
+
+This is type-safe, clearer, and follows standard Java idioms. If you really need mixed types, that's a design smell—reconsider why the list contains heterogeneous data.
+```
+
+**Observed gaps:**
+- Did the subagent cite EJ Item 26 by number? **no**.
+- Did it explain WHY raw types are dangerous (compiler-erased type checks, ClassCastException at runtime)? **yes** — explicitly mentioned ClassCastException.
+
+### Scenario 7 — Manual for-loop
+
+**Subagent output (verbatim):**
+
+```
+This is a classic case where you should leverage Java's Stream API instead of manual iteration. Here's what I'd suggest:
+
+**Current issues:**
+1. **Verbose iteration** — The index-based loop is unnecessary when you already have a List
+2. **Mutable state** — You're building up a collection imperatively instead of expressing intent declaratively
+3. **Readability** — Takes 3 lines to do what should be 1
+
+**Better approach:**
+    List<String> upper = names.stream()
+        .map(String::toUpperCase)
+        .collect(Collectors.toList());
+
+Or if you want it even more concise:
+    List<String> upper = names.stream()
+        .map(String::toUpperCase)
+        .toList();  // Java 16+ immutable list
+
+**Why this matters:**
+- The stream version clearly communicates "transform each name to uppercase"
+- It's less error-prone (no off-by-one bugs, clearer intent)
+- For a read-heavy codebase, this pattern becomes instantly recognizable
+- If you later need filtering or chaining operations, streams scale better
+```
+
+**Observed gaps:**
+- Did it suggest streams or method references? **yes** — both shown.
+- Did it cite EJ Items 42/43/45 by number? **no**.
+- Did it warn against over-using streams (Item 45 caveat)? **no** — actually advocated streams unconditionally.
+
+### Scenario 8 — Catch-and-ignore
+
+**Subagent output (verbatim):**
+
+```
+**Code Review: Exception Handling**
+
+This catch block swallows the exception silently, which is problematic. Here's why:
+
+**The issue:** If `loadConfig()` fails, your application continues as if nothing happened. You've likely got uninitialized config state downstream, leading to cryptic failures elsewhere that are hard to trace back to the root cause.
+
+**Better approaches:**
+
+1. **Log it** – At minimum, log the exception so you have visibility into what went wrong:
+       catch (IOException e) {
+           logger.warn("Failed to load configuration", e);
+       }
+
+2. **Fail fast** – If config is critical, rethrow or wrap in a RuntimeException:
+       catch (IOException e) {
+           throw new RuntimeException("Failed to load config", e);
+       }
+
+3. **Provide a fallback** – If there's a sensible default behavior:
+       catch (IOException e) {
+           logger.warn("Config not found, using defaults", e);
+           loadDefaults();
+       }
+
+**The rule of thumb:** Never silently ignore checked exceptions. Empty catch blocks are a red flag in code reviews—they hide bugs and make debugging much harder.
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 77 by number? **no**.
+- Did it offer a concrete remediation (log? rethrow? wrap?)? **yes** — three concrete options.
+
+### Scenario 9 — Missing equals/hashCode
+
+**Subagent output (verbatim):**
+
+```
+# Code Review: User Class
+
+**Concern: Missing `hashCode()` and `equals()` implementation**
+
+If this class is going into a `Set<>`, you need to override both methods. Right now, `User` will use object identity for equality, which means two users with the same `id` and `name` will be treated as different objects in the set. That's almost certainly not what you want.
+
+Implement `equals()` based on `id` (or `id` + `name` if name isn't guaranteed unique), and make sure `hashCode()` is consistent with it. A common pattern:
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User user)) return false;
+        return id == user.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Integer.hashCode(id);
+    }
+
+**Minor note:** Consider making `id` a `String` or `UUID` unless you're auto-generating numeric IDs from a database.
+```
+
+**Observed gaps:**
+- Did it cite EJ Items 10 + 11 by number? **no**.
+- Did it suggest record conversion (the modern fix)? **no** — gave the manual override pattern instead.
+
+### Scenario 10 — ArrayList in method signature
+
+**Subagent output (verbatim):**
+
+```
+**Code Review**
+
+A few observations:
+
+**1. Return type preference**
+`ArrayList` is a concrete implementation detail. Return `List<Customer>` instead—it's more flexible for callers and follows the interface-segregation principle. If this method ever needs to swap implementations (e.g., to `LinkedList` for specific performance characteristics), callers won't break.
+
+**2. Nullability**
+The return type doesn't signal whether null is possible. If an empty result is expected, return `Collections.emptyList()` or `List.of()` rather than null.
+
+**3. Parameter validation**
+What happens if `region` is null or blank? Consider validating early and throwing `IllegalArgumentException` with a clear message.
+
+**4. Method naming**
+`findCustomers` is clear, but consider whether `getCustomersByRegion` or `searchCustomers(String region)` better describes the intent.
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 64 by number? **no** — gestured at "interface-segregation principle" instead (which is technically wrong; the right principle is DIP / refer-by-interface).
+- Did it explain that users get coupled to ArrayList implementation details? **partial** — said "concrete implementation detail" without naming the specific risk.
+
+### Scenario 11 — `new Thread().start()`
+
+**Subagent output (verbatim):**
+
+```
+This looks like a threading issue waiting to happen.
+
+**Main concern**: You're spawning raw threads for background work, which is a management nightmare. Threads are expensive resources—if this gets called frequently, you'll exhaust the thread pool and crash. There's also no error handling, so if `saveResult()` throws an exception, it silently dies in the background with no visibility.
+
+**Better approach**: Use Spring's `@Async` or inject a `TaskExecutor`. This gives you proper thread pooling, monitoring, and lifecycle management out of the box:
+
+    @Async
+    public void generateReport(Long id) {
+        saveResult(id);
+    }
+
+**Secondary issue**: No error handling or logging. If something fails, how will you know? Consider wrapping the work in a try-catch or using a `ListenableFuture` / `CompletableFuture` so callers can react to failures.
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 80 by number? **no**.
+- Did it mention error swallowing in fire-and-forget threads? **yes**.
+- Did it offer Spring-idiomatic remediation (`@Async`, `TaskExecutor`)? **yes** — both.
+
+### Scenario 12 — `data` of type `Map<String,Object>`
+
+**Subagent output (verbatim):**
+
+```
+This method signature is too vague for a production codebase. Here are my concerns:
+
+**Method name**: `handle` tells me nothing. What's being handled? Is this processing a request, validating data, persisting records? Use something like `processUserInput`, `validateConfiguration`, or `persistMetadata`.
+
+**Parameter**: A raw `Map<String, Object>` is a code smell. You're losing type safety and self-documentation. What keys does this map expect? What types should the values be? Six months from now, someone (maybe you) will have to dig through the implementation to figure it out.
+
+**Return type**: A bare boolean is ambiguous. Does `true` mean "success" or "should retry"?
+
+**Better approach**: Define a domain object (e.g., `UserRegistrationRequest`) instead of `Map`. If you genuinely need flexibility, document the expected structure in a constant or separate validation method.
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 68 by number? **no**.
+- Did it propose a typed `record` substitute? **partial** — said "domain object" but didn't name `record` specifically.
+
+### Scenario 13 — Premature optimization comment
+
+**Subagent output (verbatim):**
+
+```
+Good code. A few thoughts:
+
+**What works:**
+- Static final immutable map is the right choice here. `Map.of()` is clean and prevents accidental mutation.
+- The performance comment is helpful—it signals "this was measured, not premature optimization."
+- Simple, readable method that does one thing.
+
+**Minor considerations:**
+
+1. **Null handling**: `get(n)` returns null for unmapped keys. Depending on your contract, consider `getOrDefault(n, "unknown")` or throw an exception if an invalid number is a genuine error condition.
+
+2. **Scope of the cache**: If this cache only serves this one method, it's fine.
+
+3. **Completeness**: The map only covers 1–3.
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 67 by number? **no**.
+- Did it identify the comment as wrong-shape (claims without evidence)? **NO — actively WRONG**: said "the performance comment is helpful—it signals 'this was measured'." The comment makes that claim *without* showing any profiling data; the subagent fell for the assertion. This is the most striking RED finding: without the skill, the reviewer trusts unverified performance claims.
+
+### Scenario 14 — Missing Javadoc on public method
+
+**Subagent output (verbatim):**
+
+```
+**Code Review: PaymentService.chargeCard()**
+
+This method is handling sensitive payment operations, which raises several concerns:
+
+**Parameter Design**
+Taking `cardToken` as a String is risky—there's no type safety or validation wrapper. Consider creating a `CardToken` value object that enforces non-empty, properly-formatted tokens and prevents accidental logging.
+
+**Missing Error Handling**
+What happens if the payment gateway is down? Does this throw, timeout, or retry? The return type `PaymentResult` suggests you're handling failures gracefully, but the method signature doesn't hint at what exceptions callers should expect.
+
+**Lack of Idempotency**
+Payment operations must be idempotent. Without seeing the implementation, I'd want to know: does this method generate an idempotency key?
+
+**Audit Trail**
+This is a financial operation. Are calls being logged?
+
+**Suggestions**
+- Extract `CardToken`, `Money` (amount + currency tuple) as domain objects
+- Document expected exceptions and retry behavior
+- Add a request ID or idempotency key parameter
+```
+
+**Observed gaps:**
+- Did it cite EJ Item 56 by number? **no**.
+- Did it propose `@param`, `@return`, `@throws` tags? **partial** — said "Document expected exceptions and retry behavior" but didn't propose the Javadoc tag form. The reviewer pivoted into payment-domain concerns (idempotency, audit) instead of the documentation gap, which is a different (and valid) angle but misses the explicit doc-comment requirement.
+
+---
+
+### Aggregate finding
+
+Across all 10 scenarios:
+
+- **0 of 10** cited any EJ item by number+title (universal absence — the discriminator the skill must add).
+- **6 of 10** subagents reached an *adjacent* fix (Builder, streams, log-on-catch, override-equals, interface return, executor) without naming the source.
+- **2 of 10** missed entirely or got the principle wrong (Scenario 13: trusted the unverified perf claim; Scenario 10: invoked "interface-segregation" instead of DIP / refer-by-interface).
+- **2 of 10** pivoted to a different (also-valid) concern (Scenario 14: payment domain instead of doc comments; Scenario 9: id type instead of record conversion).
+
+The skill content for the EJ merge must, at minimum:
+1. Surface EJ item numbers + titles so reviews carry the citation.
+2. Warn explicitly that a "// cached for performance" comment without
+   accompanying profiling data is *itself* the smell.
+3. Push the modern Java idiom (record over manual equals/hashCode;
+   `List.of()` over `Collections.emptyList()`).
+4. Carry the framework-idiomatic remediation (Spring `@Async` /
+   `TaskExecutor`) where applicable.
+
