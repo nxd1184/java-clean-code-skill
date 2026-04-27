@@ -219,3 +219,78 @@ JVM — misleading and hard to diagnose. Pin the JDK version in your build tool.
   (one kind of work, one backing resource).
 - [architecture.md](architecture.md) — async adapters and thread pools live in
   the outbound adapter layer; the domain core stays synchronous and testable.
+
+---
+
+## Effective Java additions
+
+### Item 78: Synchronize access to shared mutable data
+
+Without synchronization, threads see stale or torn values. Three mechanisms:
+
+1. **`synchronized`** — atomicity AND visibility. Use for compound actions.
+2. **`volatile`** — visibility only (no atomicity). Use for single-write flags.
+3. **`java.util.concurrent.atomic`** — atomic primitives without locking.
+
+```java
+// WRONG — long writes are not atomic on 32-bit JVMs; reads can tear
+private long count;
+public void increment() { count++; }
+
+// RIGHT — AtomicLong
+private final AtomicLong count = new AtomicLong();
+public void increment() { count.incrementAndGet(); }
+
+// RIGHT for compound action — synchronized
+private final Map<String, Integer> totals = new HashMap<>();
+public synchronized void add(String k, int v) {
+    totals.merge(k, v, Integer::sum);
+}
+```
+
+Spring Boot caveat: `@Transactional` does NOT synchronize across threads —
+it bounds DB transactions, not in-memory state.
+
+### Item 80: Executors, tasks, and streams over threads
+
+`new Thread().start()` is rarely the right answer in modern Java: no
+back-pressure, errors get swallowed, no concurrency limit, hard to monitor
+or shut down.
+
+```java
+// BEFORE
+new Thread(() -> generateReport(id)).start();
+
+// AFTER — Spring's TaskExecutor
+@Service
+public class ReportService {
+    private final TaskExecutor executor;
+    public ReportService(TaskExecutor executor) { this.executor = executor; }
+
+    public void requestReport(Long id) {
+        executor.execute(() -> generateReport(id));
+    }
+}
+```
+
+For request-scoped async, prefer `@Async` + `CompletableFuture<T>` so
+errors propagate.
+
+**Java 21 angle:** virtual threads (`Executors.newVirtualThreadPerTaskExecutor()`)
+make I/O-bound work cheap while keeping the executor model.
+
+### Item 81: Concurrency utilities over wait/notify
+
+`wait()` and `notify()` are low-level and easy to get wrong. The
+`java.util.concurrent` toolbox covers nearly every coordination need:
+
+| Need | Use |
+|---|---|
+| Wait for N events | `CountDownLatch` |
+| Limit concurrent access | `Semaphore` |
+| Producer-consumer queue | `BlockingQueue` (e.g. `LinkedBlockingQueue`) |
+| Wait for several futures | `CompletableFuture.allOf` |
+| Periodic task | `ScheduledExecutorService` (or Spring's `@Scheduled`) |
+
+If you're tempted to write `synchronized (x) { x.wait(); }`, stop. There's
+a higher-level utility for the case.
