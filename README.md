@@ -342,7 +342,7 @@ No. It catches mechanical violations (Demeter chains, flag args, magic numbers, 
 
 ## Credits
 
-The 20 rules and topic references are distilled from *Clean Code: A Handbook of Agile Software Craftsmanship* by Robert C. Martin (2008, Prentice Hall). This skill is an unofficial application of those principles to Java — not affiliated with or endorsed by the author or the publisher.
+The 20 rules and topic references are distilled from *Clean Code: A Handbook of Agile Software Craftsmanship* by Robert C. Martin (2008, Prentice Hall) and *Effective Java, 3rd Edition* by Joshua Bloch (2018, Addison-Wesley). This skill is an unofficial application of those principles to Java — not affiliated with or endorsed by either author or publisher.
 
 ---
 

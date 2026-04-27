@@ -1,7 +1,7 @@
 {
   "name": "java-clean-code",
   "description": "Clean code principles for any Java project — naming, functions, SOLID, TDD, concurrency, clean architecture. Examples cover Spring Boot, plain Java, and pure domain logic.",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "author": {
     "name": "Steven Nguyen"
   },
