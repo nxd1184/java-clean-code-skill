@@ -178,3 +178,95 @@ data and object intentionally.
 - **Related:** [solid.md](solid.md) — SRP: anemic models often signal an SRP
   violation at the service layer, where services absorb all the logic that
   should live in the domain object.
+
+---
+
+## Effective Java additions
+
+### Items 10/11/12: equals, hashCode, toString contracts
+
+If you override `equals`, you MUST override `hashCode` (or hash-based
+collections break). `toString` should be human-readable for debugging.
+
+**The equals contract** (Item 10):
+- **Reflexive:** `x.equals(x)` is true.
+- **Symmetric:** `x.equals(y)` ⟺ `y.equals(x)`.
+- **Transitive:** if `x.equals(y)` and `y.equals(z)`, then `x.equals(z)`.
+- **Consistent:** repeated calls return the same result (no random state).
+- **Non-null:** `x.equals(null)` is false.
+
+The contract is hard to satisfy when subclassing — adding a field in a
+subclass usually breaks symmetry or transitivity.
+
+**Modern Java fix:** use a `record`. Records auto-generate equals,
+hashCode, and toString from the components. They're final by design, which
+sidesteps the subclassing problem.
+
+```java
+// BEFORE — easy to get wrong
+public class Point {
+    private final int x, y;
+    public Point(int x, int y) { this.x = x; this.y = y; }
+    // missing equals/hashCode/toString
+}
+
+// AFTER — record gives you all three for free
+public record Point(int x, int y) {}
+```
+
+If you can't use a record (existing class hierarchy, mutable state), use
+your IDE's generator and verify the contract in a unit test.
+
+### Item 17: Minimize mutability + Item 50: Defensive copies
+
+Immutable classes are simpler to reason about, thread-safe by default, and
+freely shareable. Five rules: no setters; class final; all fields `final`
+and private; defensive copies for any mutable component (Item 50).
+
+Java 17 records satisfy rules 1–4 automatically. Rule 5 still applies for
+mutable components (`Date`, `List`).
+
+```java
+public record Period(Date start, Date end) {
+    public Period {
+        start = new Date(start.getTime());     // copy in (TOCTOU-safe)
+        end   = new Date(end.getTime());
+        if (start.after(end))
+            throw new IllegalArgumentException("start > end");
+    }
+    public Date start() { return new Date(start.getTime()); }   // copy out
+    public Date end()   { return new Date(end.getTime()); }
+}
+```
+
+Always copy *before* validating — otherwise a caller can mutate the
+parameter between the check and the assignment. Return mutable internals
+as unmodifiable views (`List.copyOf(list)`).
+
+### Item 54: Return empty collections, not null
+
+Returning `null` forces every caller to null-check. Empty singletons
+compose with for-each, streams, and `addAll` cleanly.
+
+```java
+// BEFORE
+return cheesesInStock.isEmpty() ? null : new ArrayList<>(cheesesInStock);
+
+// AFTER
+return List.copyOf(cheesesInStock);   // empty list if empty
+```
+
+### Item 55: Return Optionals judiciously
+
+`Optional<T>` signals "this might legitimately be absent". Use it for
+**return types** where absence is part of the contract — never for fields,
+parameters, or collection elements (`List<Optional<T>>` is wrong).
+
+```java
+public Optional<User> findByEmail(String email) { /* ... */ }
+
+userRepo.findByEmail(email).map(User::name).orElse("anonymous");
+```
+
+Avoid `Optional.get()` without `isPresent()` — `orElse`, `orElseThrow`, and
+`ifPresent` are the safe forms.
