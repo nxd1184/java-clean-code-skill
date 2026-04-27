@@ -48,12 +48,11 @@ Each rule links to a reference file for depth. A subset keeps a *Check* hint whe
 
 ## References
 
-Each rule links inline to the topic file. Additional depth: [smells](references/smells.md) (symptom lookup), [architecture](references/architecture.md) (clean architecture layers), [concurrency](references/concurrency.md), [craftsmanship](references/craftsmanship.md).
+Each rule links inline to the topic file. Additional depth: [smells](references/smells.md), [architecture](references/architecture.md), [concurrency](references/concurrency.md), [craftsmanship](references/craftsmanship.md), [creating-objects](references/creating-objects.md), [generics](references/generics.md), [lambdas-and-streams](references/lambdas-and-streams.md), [exceptions](references/exceptions.md).
 
 ## Pre-delivery checklist
 
 - [ ] Verb+noun names; no flags; ≤3 args.
-- [ ] No trainwrecks; one-sentence class purpose.
 - [ ] Tests exist, run fast, written first.
 
 ## Rationalizations
