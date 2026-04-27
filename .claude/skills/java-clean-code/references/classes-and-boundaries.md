@@ -191,3 +191,101 @@ minutes to write; the unmigrated blast radius costs days.
 - SKILL.md rule: **12**
 - Full SOLID deep dive (all five principles): [solid.md](solid.md)
 - Architecture layers and package organization: [architecture.md](architecture.md)
+
+---
+
+## Effective Java additions
+
+### Item 15: Minimize accessibility
+
+Make every class and member as private as possible. Order of preference:
+`private` > package-private > `protected` > `public`. Public is API
+contract — breaking changes hurt.
+
+For Spring Boot 3 services: prefer **package-private classes with public
+methods** when only used within the package. The constructor stays public
+for DI without leaking the type.
+
+### Item 18: Composition over inheritance
+
+Inheritance binds you to the parent's implementation. Composition lets you
+swap collaborators. Classic counter-example — counting `add` calls:
+
+```java
+// BAD — InstrumentedHashSet's addAll double-counts because HashSet.addAll
+// internally calls add()
+public class InstrumentedHashSet<E> extends HashSet<E> {
+    private int addCount = 0;
+    @Override public boolean add(E e) { addCount++; return super.add(e); }
+    @Override public boolean addAll(Collection<? extends E> c) {
+        addCount += c.size();
+        return super.addAll(c);   // calls add() → double counts
+    }
+}
+
+// GOOD — composition via a forwarding wrapper
+public class InstrumentedSet<E> extends ForwardingSet<E> {
+    private int addCount = 0;
+    public InstrumentedSet(Set<E> delegate) { super(delegate); }
+    @Override public boolean add(E e) { addCount++; return super.add(e); }
+    @Override public boolean addAll(Collection<? extends E> c) {
+        addCount += c.size();
+        return super.addAll(c);
+    }
+}
+```
+
+Spring Boot 3 mapping: prefer collaborator interfaces injected via the
+constructor over `extends BaseService`.
+
+### Item 20: Prefer interfaces to abstract classes
+
+Interfaces support multiple inheritance, mixins, and types without
+implementation. Java 8 default methods further closed the gap.
+
+**Interfaces** when: multiple unrelated classes should support the type;
+common behavior is non-trivial but not shared.
+**Abstract classes** when: a skeletal implementation provides real shared
+logic most subclasses benefit from (`AbstractList`).
+
+### Item 22: Interfaces only to define types
+
+Don't put constants in an interface to avoid `Class.CONSTANT` — that
+exposes internal implementation as part of the public API.
+
+```java
+// BAD — constant interface
+public interface PhysicalConstants {
+    static final double AVOGADRO = 6.022e23;
+}
+public class Calculator implements PhysicalConstants { /* ... */ }
+// PhysicalConstants is now part of Calculator's public type.
+
+// GOOD — utility class with private constructor
+public final class PhysicalConstants {
+    private PhysicalConstants() {}
+    public static final double AVOGADRO = 6.022e23;
+}
+```
+
+### Item 64: Refer to objects by their interfaces
+
+Declare parameters, return types, and fields by interface, not
+implementation.
+
+```java
+// BEFORE — concrete type leaks
+public ArrayList<Customer> findCustomers(String region) { /* ... */ }
+HashMap<String, User> users = new HashMap<>();
+
+// AFTER — interface
+public List<Customer> findCustomers(String region) { /* ... */ }
+Map<String, User> users = new HashMap<>();
+```
+
+Operationalizes **Rule 19 (DIP)** in [solid.md](solid.md): depend on
+abstractions, not concretions, at the type level.
+
+**Exception:** when the implementation has methods the interface doesn't
+and you legitimately need them (`ArrayList.ensureCapacity`,
+`LinkedList.descendingIterator`), keep the concrete type and document why.
