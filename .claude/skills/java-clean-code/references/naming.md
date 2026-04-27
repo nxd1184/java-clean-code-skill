@@ -89,3 +89,34 @@ Pick one verb (`find`, `get`, `fetch`, `retrieve`) per concept and stick to it.
 
 - SKILL.md rules: 1, 14, 17.
 - Related: [comments.md](comments.md) (names often replace comments), [functions.md](functions.md) (a good function name is the first test of its design).
+
+---
+
+## Effective Java additions
+
+### Item 68: Adhere to generally accepted naming conventions
+
+The Java community has stable conventions; following them lets readers
+skim. Violating them slows everyone down.
+
+| Identifier | Convention | Example |
+|---|---|---|
+| Package | lowercase, dot-separated | `com.example.users` |
+| Class / Interface | UpperCamelCase, noun | `OrderService`, `Comparable` |
+| Method | lowerCamelCase, verb | `findById`, `isExpired` |
+| Field | lowerCamelCase, noun | `customerId`, `createdAt` |
+| Constant | UPPER_SNAKE_CASE | `MAX_RETRY_COUNT` |
+| Type variable | single uppercase letter | `T`, `E`, `K`, `V`, `R`, `X`, `S`, `U` |
+| Boolean method | starts with `is`/`has`/`should` | `isActive`, `hasNext` |
+| Plural collection field | name in plural | `users`, `customers` |
+
+**Beyond syntax — semantic conventions** (Item 68 + Rule 1):
+
+- `getX()` returns X (no side effects). `setX()` mutates.
+- `toX()` is a conversion. `asX()` is a view (cheap, may share state).
+- `ofX()`, `valueOf()`, `from()` are static factories (see
+  [creating-objects.md](creating-objects.md)).
+
+Reinforces **Rule 1 (Names reveal intent)** and **Rule 14 (Consistent
+vocabulary)** at the start of this file. Item 68 is the syntactic
+surface; Rules 1 and 14 are the semantic ones.
